@@ -10,13 +10,12 @@
 #include <chrono>
 #include <map>
 #include <random>
-#include <ctime>
 #include <string_view>
 #include <optional>
 #include <filesystem>
-#include <format>
 #include <span>
 #include <ranges>
+#include <iomanip>
 
 namespace fs = std::filesystem;
 namespace ranges = std::ranges;
@@ -33,7 +32,7 @@ enum class CommandType {
     UNKNOWN
 };
 
-// Improved Command structure using C++20/23 features
+// Improved Command structure
 struct Command {
     CommandType type = CommandType::UNKNOWN;
     std::string key;
@@ -43,8 +42,8 @@ struct Command {
     bool useRandomRange = false;
 };
 
-// Virtual key code mapping - now using string_view for efficiency
-const std::map<std::string_view, BYTE> keyMap = {
+// Virtual key code mapping - using string_view for efficiency
+const std::map<std::string, BYTE> keyMap = {
     // Letters
     {"A", 0x41}, {"B", 0x42}, {"C", 0x43}, {"D", 0x44}, {"E", 0x45},
     {"F", 0x46}, {"G", 0x47}, {"H", 0x48}, {"I", 0x49}, {"J", 0x4A},
@@ -96,7 +95,7 @@ const std::map<std::string_view, BYTE> keyMap = {
     {"GRAVE", VK_OEM_3}, {"TILDE", VK_OEM_3}
 };
 
-// C++23: Using string_view and improved trim
+// C++23: Using string_view for efficiency
 [[nodiscard]] std::string_view trim(std::string_view str) noexcept {
     const auto first = str.find_first_not_of(" \t\r\n");
     if (first == std::string_view::npos) return {};
@@ -104,11 +103,10 @@ const std::map<std::string_view, BYTE> keyMap = {
     return str.substr(first, (last - first + 1));
 }
 
-// C++23: Using ranges for transformation
+// C++20/23: Using ranges
 [[nodiscard]] std::string toUpper(std::string_view str) {
-    std::string result;
-    result.reserve(str.size());
-    ranges::transform(str, std::back_inserter(result), 
+    std::string result(str);
+    ranges::transform(result, result.begin(), 
                      [](unsigned char c) { return std::toupper(c); });
     return result;
 }
@@ -121,7 +119,7 @@ struct ParsedValue {
     bool isRange;
 };
 
-// C++23: Using optional for error handling (simpler than expected for now)
+// C++17/20: Using optional for error handling
 [[nodiscard]] std::optional<ParsedValue> parseValueOrRange(std::string_view str) {
     const auto dashPos = str.find('-');
     
@@ -157,7 +155,7 @@ struct ParsedValue {
     }
 }
 
-// Random generator with better C++23 practices
+// Random generator class
 class RandomGenerator {
 private:
     std::random_device rd;
@@ -179,7 +177,19 @@ public:
     }
 };
 
-// Parse pause command with better error handling
+// Helper function for formatted output (since std::format might not be available)
+template<typename T>
+void printFormatted(const std::string& format, const T& value) {
+    std::cout << std::fixed << std::setprecision(3);
+    size_t pos = format.find("{}");
+    if (pos != std::string::npos) {
+        std::cout << format.substr(0, pos) << value << format.substr(pos + 2);
+    } else {
+        std::cout << format;
+    }
+}
+
+// Parse pause command
 [[nodiscard]] std::optional<Command> parsePauseCommand(std::string_view durationStr, int lineNumber) {
     Command cmd;
     cmd.type = CommandType::PAUSE;
@@ -202,8 +212,8 @@ public:
             cmd.useRandomRange = true;
         }
         catch (const std::exception& e) {
-            std::cerr << std::format("Warning: Invalid pause duration at line {}: {}\n", 
-                                     lineNumber, e.what());
+            std::cerr << "Warning: Invalid pause duration at line " << lineNumber 
+                     << ": " << e.what() << "\n";
             return std::nullopt;
         }
     }
@@ -217,8 +227,8 @@ public:
             cmd.useRandomRange = false;
         }
         catch (const std::exception& e) {
-            std::cerr << std::format("Warning: Invalid pause duration at line {}: {}\n", 
-                                     lineNumber, e.what());
+            std::cerr << "Warning: Invalid pause duration at line " << lineNumber 
+                     << ": " << e.what() << "\n";
             return std::nullopt;
         }
     }
@@ -226,16 +236,16 @@ public:
     return cmd;
 }
 
-// Parse config with filesystem and better error handling
+// Parse config with filesystem
 [[nodiscard]] std::optional<std::vector<Command>> parseConfig(const fs::path& filename) {
     if (!fs::exists(filename)) {
-        std::cerr << std::format("Error: Config file does not exist: {}\n", filename.string());
+        std::cerr << "Error: Config file does not exist: " << filename.string() << "\n";
         return std::nullopt;
     }
     
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << std::format("Error: Could not open config file: {}\n", filename.string());
+        std::cerr << "Error: Could not open config file: " << filename.string() << "\n";
         return std::nullopt;
     }
     
@@ -247,7 +257,7 @@ public:
         lineNumber++;
         const auto trimmedLine = trim(line);
         
-        // Skip empty lines and comments - using C++23 string features
+        // Skip empty lines and comments
         if (trimmedLine.empty() || trimmedLine[0] == '#' || trimmedLine[0] == ';') {
             continue;
         }
@@ -261,8 +271,8 @@ public:
         if (commandTypeStr == "PAUSE") {
             std::string durationStr;
             if (!(iss >> durationStr)) {
-                std::cerr << std::format("Warning: Invalid pause duration at line {}: {}\n", 
-                                        lineNumber, line);
+                std::cerr << "Warning: Invalid pause duration at line " << lineNumber 
+                         << ": " << line << "\n";
                 continue;
             }
             
@@ -276,14 +286,14 @@ public:
             
             iss >> cmd.key;
             if (cmd.key.empty()) {
-                std::cerr << std::format("Warning: Missing key at line {}: {}\n", lineNumber, line);
+                std::cerr << "Warning: Missing key at line " << lineNumber << ": " << line << "\n";
                 continue;
             }
             
             std::string durationStr;
             if (!(iss >> durationStr)) {
-                std::cerr << std::format("Warning: Invalid key duration at line {}: {}\n", 
-                                        lineNumber, line);
+                std::cerr << "Warning: Invalid key duration at line " << lineNumber 
+                         << ": " << line << "\n";
                 continue;
             }
             
@@ -295,8 +305,8 @@ public:
                 cmd.key = toUpper(cmd.key);
                 commands.push_back(cmd);
             } else {
-                std::cerr << std::format("Warning: Invalid key duration at line {}: {}\n", 
-                                        lineNumber, line);
+                std::cerr << "Warning: Invalid key duration at line " << lineNumber 
+                         << ": " << line << "\n";
             }
         }
         else if (commandTypeStr == "KEY") {
@@ -309,7 +319,7 @@ public:
             
             iss >> cmd.key;
             if (cmd.key.empty()) {
-                std::cerr << std::format("Warning: Missing key at line {}: {}\n", lineNumber, line);
+                std::cerr << "Warning: Missing key at line " << lineNumber << ": " << line << "\n";
                 continue;
             }
             cmd.key = toUpper(cmd.key);
@@ -318,8 +328,8 @@ public:
         else if (commandTypeStr == "LOOP") {
             int loopCount;
             if (!(iss >> loopCount)) {
-                std::cerr << std::format("Warning: Invalid loop count at line {}: {}\n", 
-                                        lineNumber, line);
+                std::cerr << "Warning: Invalid loop count at line " << lineNumber 
+                         << ": " << line << "\n";
                 continue;
             }
             
@@ -334,7 +344,7 @@ public:
             commands.push_back(cmd);
         }
         else {
-            std::cerr << std::format("Warning: Unknown command at line {}: {}\n", lineNumber, line);
+            std::cerr << "Warning: Unknown command at line " << lineNumber << ": " << line << "\n";
         }
     }
     
@@ -360,8 +370,8 @@ void pressKey(BYTE vkCode, std::chrono::milliseconds duration) {
     SendInput(1, &input[1], sizeof(INPUT));
 }
 
-// Execute macro with span for better safety
-void executeMacro(std::span<const Command> commands) {
+// Execute macro with span (C++20 feature)
+void executeMacro(const std::vector<Command>& commands) {
     std::vector<int> loopStack;
     RandomGenerator rng;
     
@@ -379,13 +389,13 @@ void executeMacro(std::span<const Command> commands) {
                 auto actualDuration = cmd.duration;
                 if (cmd.useRandomRange) {
                     actualDuration = rng.getInRange(cmd.durationMin, cmd.durationMax);
-                    std::cout << std::format("Pausing for {:.3f} seconds (random from {:.3f}-{:.3f})...\n",
-                                            actualDuration.count() / 1000.0,
-                                            cmd.durationMin.count() / 1000.0,
-                                            cmd.durationMax.count() / 1000.0);
+                    std::cout << "Pausing for " << std::fixed << std::setprecision(3) 
+                             << actualDuration.count() / 1000.0 << " seconds (random from "
+                             << cmd.durationMin.count() / 1000.0 << "-"
+                             << cmd.durationMax.count() / 1000.0 << ")...\n";
                 } else {
-                    std::cout << std::format("Pausing for {:.3f} seconds...\n", 
-                                            actualDuration.count() / 1000.0);
+                    std::cout << "Pausing for " << std::fixed << std::setprecision(3)
+                             << actualDuration.count() / 1000.0 << " seconds...\n";
                 }
                 std::this_thread::sleep_for(actualDuration);
                 break;
@@ -399,23 +409,24 @@ void executeMacro(std::span<const Command> commands) {
                     auto actualDuration = cmd.duration;
                     if (cmd.useRandomRange) {
                         actualDuration = rng.getInRange(cmd.durationMin, cmd.durationMax);
-                        std::cout << std::format("Pressing key: {} for {}ms (random from {}-{}ms)\n",
-                                               cmd.key, actualDuration.count(),
-                                               cmd.durationMin.count(), cmd.durationMax.count());
+                        std::cout << "Pressing key: " << cmd.key << " for " 
+                                 << actualDuration.count() << "ms (random from "
+                                 << cmd.durationMin.count() << "-" 
+                                 << cmd.durationMax.count() << "ms)\n";
                     } else {
-                        std::cout << std::format("Pressing key: {} for {}ms\n", 
-                                               cmd.key, actualDuration.count());
+                        std::cout << "Pressing key: " << cmd.key << " for " 
+                                 << actualDuration.count() << "ms\n";
                     }
                     pressKey(it->second, actualDuration);
                 } else {
-                    std::cerr << std::format("Unknown key: {}\n", cmd.key);
+                    std::cerr << "Unknown key: " << cmd.key << "\n";
                 }
                 break;
             }
             
             case CommandType::LOOP: {
                 loopStack.push_back(static_cast<int>(cmd.duration.count()));
-                std::cout << std::format("Starting loop ({} iterations)\n", cmd.duration.count());
+                std::cout << "Starting loop (" << cmd.duration.count() << " iterations)\n";
                 break;
             }
             
@@ -452,18 +463,15 @@ void executeMacro(std::span<const Command> commands) {
 }
 
 int main(int argc, char* argv[]) {
-    // Using span for argv
-    std::span<char*> args(argv, argc);
-    
     fs::path configFile = "macro.ini";
-    if (args.size() > 1) {
-        configFile = args[1];
+    if (argc > 1) {
+        configFile = argv[1];
     }
     
     std::cout << "================================\n";
     std::cout << "Keyboard Macro Tool v2.0 (C++23)\n";
     std::cout << "================================\n";
-    std::cout << std::format("Loading config from: {}\n", configFile.string());
+    std::cout << "Loading config from: " << configFile.string() << "\n";
     std::cout << "Press ESC at any time to abort the macro\n\n";
     
     // Parse config file with better error handling
@@ -479,13 +487,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    std::cout << std::format("Loaded {} commands\n", commands.size());
+    std::cout << "Loaded " << commands.size() << " commands\n";
     std::cout << "Starting in 3 seconds...\n\n";
     
     // Give user time to switch to target application
     std::this_thread::sleep_for(3s);
     
-    // Execute macro with span
+    // Execute macro
     executeMacro(commands);
     
     std::cout << "\nMacro execution completed!\n";
