@@ -140,14 +140,6 @@ Specify a different config file:
 macro_tool.exe my_custom_macro.ini
 ```
 
-### Human-like Testing
-
-Use random ranges for more realistic input:
-
-```bash
-macro_tool.exe human_like.ini
-```
-
 ### Execution Flow
 
 1. Launch the tool
