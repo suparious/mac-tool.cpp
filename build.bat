@@ -20,7 +20,7 @@ if %errorlevel% neq 0 (
 
 REM Compile the program
 echo Compiling macro_tool.cpp...
-g++ -o macro_tool.exe macro_tool.cpp -luser32 -std=c++17 -O2 -static
+g++ -o macro_tool.exe macro_tool.cpp -luser32 -std=c++23 -O2 -static
 
 if %errorlevel% neq 0 (
     echo.
