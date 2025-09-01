@@ -23,6 +23,7 @@ A lightweight, configurable keyboard macro automation tool for Windows. Perfect 
 ### Method 1: Using the Build Script (Recommended)
 
 Simply double-click `build.bat` or run it from the command line:
+
 ```bash
 build.bat
 ```
@@ -30,6 +31,7 @@ build.bat
 ### Method 2: Manual Compilation with MinGW-w64
 
 If you have MinGW-w64 installed:
+
 ```bash
 g++ -o macro_tool.exe macro_tool.cpp -luser32 -std=c++11 -O2 -static
 ```
@@ -56,15 +58,15 @@ Edit `macro.ini` or create your own config file with the following commands:
 
 ### Available Commands
 
-| Command | Syntax | Description |
-|---------|--------|-------------|
-| PAUSE | `pause <seconds>` | Pause execution for specified seconds |
-| PAUSE | `pause <min>-<max>` | Pause for random seconds within range |
-| KEYDOWN | `keydown <key> <milliseconds>` | Press and hold key for specified milliseconds |
-| KEYDOWN | `keydown <key> <min>-<max>` | Press and hold key for random milliseconds within range |
-| KEY | `key <key>` | Quick key press (50ms default) |
-| LOOP | `loop <count>` | Start a loop block that repeats count times |
-| ENDLOOP | `endloop` | End of loop block |
+| Command | Syntax                         | Description                                             |
+| ------- | ------------------------------ | ------------------------------------------------------- |
+| PAUSE   | `pause <seconds>`              | Pause execution for specified seconds                   |
+| PAUSE   | `pause <min>-<max>`            | Pause for random seconds within range                   |
+| KEYDOWN | `keydown <key> <milliseconds>` | Press and hold key for specified milliseconds           |
+| KEYDOWN | `keydown <key> <min>-<max>`    | Press and hold key for random milliseconds within range |
+| KEY     | `key <key>`                    | Quick key press (50ms default)                          |
+| LOOP    | `loop <count>`                 | Start a loop block that repeats count times             |
+| ENDLOOP | `endloop`                      | End of loop block                                       |
 
 ### Supported Keys
 
@@ -76,7 +78,7 @@ Edit `macro.ini` or create your own config file with the following commands:
 **Modifier Keys**: SHIFT, CTRL, ALT, WIN  
 **Navigation**: HOME, END, PAGEUP, PAGEDOWN  
 **Numpad**: NUMPAD0-NUMPAD9, MULTIPLY, ADD, SUBTRACT, DECIMAL, DIVIDE  
-**Symbols**: COMMA, PERIOD, SEMICOLON, QUOTE, SLASH, BACKSLASH, LEFTBRACKET, RIGHTBRACKET, MINUS, EQUALS, GRAVE  
+**Symbols**: COMMA, PERIOD, SEMICOLON, QUOTE, SLASH, BACKSLASH, LEFTBRACKET, RIGHTBRACKET, MINUS, EQUALS, GRAVE
 
 ### Decimal Notation Support
 
@@ -123,19 +125,25 @@ endloop
 ## Usage
 
 ### Basic Usage
+
 Run with default config file (macro.ini):
+
 ```bash
 macro_tool.exe
 ```
 
 ### Custom Config File
+
 Specify a different config file:
+
 ```bash
 macro_tool.exe my_custom_macro.ini
 ```
 
 ### Human-like Testing
+
 Use random ranges for more realistic input:
+
 ```bash
 macro_tool.exe human_like.ini
 ```
@@ -187,6 +195,7 @@ endloop
 ### Load Testing Example
 
 Create a `loadtest.ini` file:
+
 ```ini
 # Rapid key press test
 loop 1000
@@ -202,6 +211,7 @@ endloop
 ```
 
 Run with:
+
 ```bash
 macro_tool.exe loadtest.ini
 ```
@@ -209,6 +219,7 @@ macro_tool.exe loadtest.ini
 ### UI Navigation Test
 
 Create a `ui_test.ini` file:
+
 ```ini
 # Navigate through menu items
 keydown ALT 50
@@ -231,17 +242,21 @@ keydown ENTER 100
 ## Troubleshooting
 
 ### Macro not working in certain applications
+
 Some applications (especially games with anti-cheat) may block simulated input. Try:
+
 - Running the tool as Administrator
 - Using slightly longer key press durations
 - Adding small pauses between key presses
 
 ### Keys not registering
+
 - Ensure the target application has focus
 - Increase key hold duration (some apps need longer press times)
 - Check that the key name is spelled correctly in the config
 
 ### Compilation errors
+
 - Ensure you have the Windows SDK installed
 - Link with user32.lib (included in build commands)
 - Use C++11 or later standard
@@ -257,6 +272,7 @@ This tool is provided as-is for testing purposes. Use responsibly and only on ap
 ## Support
 
 For issues or questions:
+
 1. Check that your config file syntax is correct
 2. Verify the key names match the supported keys list
 3. Try running as Administrator if keys aren't registering
