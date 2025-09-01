@@ -25,7 +25,7 @@ REM Generate a random string for the binary name
 setlocal enabledelayedexpansion
 set "chars=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 set "random_string="
-for /L %%i in (1,1,8) do (
+for /L %%i in (1,1,16) do (
     set /a "rand_index=!RANDOM! %% 62"
     for %%j in (!rand_index!) do set "random_string=!random_string!!chars:~%%j,1!"
 )
