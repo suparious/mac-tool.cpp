@@ -10,87 +10,19 @@
 #include <chrono>
 #include <map>
 #include <random>
-#include <ctime>
-#include <ranges>       // C++23: ranges support
-#include <expected>     // C++23: std::expected for better error handling
-#include <print>        // C++23: std::print for formatted output
-#include <string_view>  // Better string handling
-#include <format>       // C++20/23: Better formatting
-#include <concepts>     // C++20/23: Concepts for type constraints
-#include <span>         // C++20: Safer array views
-#include <optional>     // Better null handling
-#include <filesystem>   // Better file handling
+#include <string_view>
+#include <format>       // C++20/23: Should be available
+#include <concepts>     // C++20: Available
+#include <span>         // C++20: Available
+#include <optional>     // C++17: Available
+#include <filesystem>   // C++17: Available
+#include <ranges>       // C++20: Available
 
 namespace fs = std::filesystem;
 namespace ranges = std::ranges;
-namespace views = std::views;
-using namespace std::chrono_literals; // C++14 but useful with C++23
+using namespace std::chrono_literals;
 
-// C++23: Using std::expected for better error handling
-template<typename T>
-using Result = std::expected<T, std::string>;
-
-// C++23: constexpr std::map is now possible
-constexpr auto initKeyMap() {
-    std::map<std::string_view, BYTE> map;
-    // Letters
-    map["A"] = 0x41; map["B"] = 0x42; map["C"] = 0x43; map["D"] = 0x44; map["E"] = 0x45;
-    map["F"] = 0x46; map["G"] = 0x47; map["H"] = 0x48; map["I"] = 0x49; map["J"] = 0x4A;
-    map["K"] = 0x4B; map["L"] = 0x4C; map["M"] = 0x4D; map["N"] = 0x4E; map["O"] = 0x4F;
-    map["P"] = 0x50; map["Q"] = 0x51; map["R"] = 0x52; map["S"] = 0x53; map["T"] = 0x54;
-    map["U"] = 0x55; map["V"] = 0x56; map["W"] = 0x57; map["X"] = 0x58; map["Y"] = 0x59;
-    map["Z"] = 0x5A;
-    
-    // Numbers
-    map["0"] = 0x30; map["1"] = 0x31; map["2"] = 0x32; map["3"] = 0x33; map["4"] = 0x34;
-    map["5"] = 0x35; map["6"] = 0x36; map["7"] = 0x37; map["8"] = 0x38; map["9"] = 0x39;
-    
-    // Function keys
-    map["F1"] = VK_F1; map["F2"] = VK_F2; map["F3"] = VK_F3; map["F4"] = VK_F4;
-    map["F5"] = VK_F5; map["F6"] = VK_F6; map["F7"] = VK_F7; map["F8"] = VK_F8;
-    map["F9"] = VK_F9; map["F10"] = VK_F10; map["F11"] = VK_F11; map["F12"] = VK_F12;
-    
-    // Special keys
-    map["SPACE"] = VK_SPACE; map["ENTER"] = VK_RETURN; map["RETURN"] = VK_RETURN;
-    map["TAB"] = VK_TAB; map["ESCAPE"] = VK_ESCAPE; map["ESC"] = VK_ESCAPE;
-    map["BACKSPACE"] = VK_BACK; map["DELETE"] = VK_DELETE; map["DEL"] = VK_DELETE;
-    map["INSERT"] = VK_INSERT; map["INS"] = VK_INSERT;
-    map["HOME"] = VK_HOME; map["END"] = VK_END;
-    map["PAGEUP"] = VK_PRIOR; map["PGUP"] = VK_PRIOR;
-    map["PAGEDOWN"] = VK_NEXT; map["PGDN"] = VK_NEXT;
-    
-    // Arrow keys
-    map["UP"] = VK_UP; map["DOWN"] = VK_DOWN; map["LEFT"] = VK_LEFT; map["RIGHT"] = VK_RIGHT;
-    
-    // Modifier keys
-    map["SHIFT"] = VK_SHIFT; map["LSHIFT"] = VK_LSHIFT; map["RSHIFT"] = VK_RSHIFT;
-    map["CTRL"] = VK_CONTROL; map["CONTROL"] = VK_CONTROL;
-    map["LCTRL"] = VK_LCONTROL; map["RCTRL"] = VK_RCONTROL;
-    map["ALT"] = VK_MENU; map["LALT"] = VK_LMENU; map["RALT"] = VK_RMENU;
-    map["WIN"] = VK_LWIN; map["WINDOWS"] = VK_LWIN; map["LWIN"] = VK_LWIN; map["RWIN"] = VK_RWIN;
-    
-    // Numpad
-    map["NUMPAD0"] = VK_NUMPAD0; map["NUMPAD1"] = VK_NUMPAD1; map["NUMPAD2"] = VK_NUMPAD2;
-    map["NUMPAD3"] = VK_NUMPAD3; map["NUMPAD4"] = VK_NUMPAD4; map["NUMPAD5"] = VK_NUMPAD5;
-    map["NUMPAD6"] = VK_NUMPAD6; map["NUMPAD7"] = VK_NUMPAD7; map["NUMPAD8"] = VK_NUMPAD8;
-    map["NUMPAD9"] = VK_NUMPAD9;
-    map["MULTIPLY"] = VK_MULTIPLY; map["ADD"] = VK_ADD; map["SUBTRACT"] = VK_SUBTRACT;
-    map["DECIMAL"] = VK_DECIMAL; map["DIVIDE"] = VK_DIVIDE;
-    
-    // Punctuation and symbols
-    map["COMMA"] = VK_OEM_COMMA; map["PERIOD"] = VK_OEM_PERIOD; map["DOT"] = VK_OEM_PERIOD;
-    map["SEMICOLON"] = VK_OEM_1; map["QUOTE"] = VK_OEM_7; map["APOSTROPHE"] = VK_OEM_7;
-    map["SLASH"] = VK_OEM_2; map["BACKSLASH"] = VK_OEM_5;
-    map["LEFTBRACKET"] = VK_OEM_4; map["RIGHTBRACKET"] = VK_OEM_6;
-    map["MINUS"] = VK_OEM_MINUS; map["EQUALS"] = VK_OEM_PLUS; map["EQUAL"] = VK_OEM_PLUS;
-    map["GRAVE"] = VK_OEM_3; map["TILDE"] = VK_OEM_3;
-    
-    return map;
-}
-
-inline constexpr auto keyMap = initKeyMap();
-
-// C++23: Structured binding with better enum support
+// Strong typing with enum class (C++11 but better practice)
 enum class CommandType {
     PAUSE,
     KEYDOWN,
@@ -101,7 +33,7 @@ enum class CommandType {
     UNKNOWN
 };
 
-// C++23: Using C++20 designated initializers with C++23 improvements
+// Modern struct with defaults (C++11/14/17 features)
 struct Command {
     CommandType type{CommandType::UNKNOWN};
     std::string key{};
@@ -109,22 +41,63 @@ struct Command {
     std::chrono::milliseconds durationMin{0};
     std::chrono::milliseconds durationMax{0};
     bool useRandomRange{false};
-    
-    // C++23: Deducing this for method chaining
-    auto& setDuration(this auto& self, std::chrono::milliseconds d) {
-        self.duration = d;
-        return self;
-    }
-    
-    auto& setRange(this auto& self, std::chrono::milliseconds min, std::chrono::milliseconds max) {
-        self.durationMin = min;
-        self.durationMax = max;
-        self.useRandomRange = true;
-        return self;
-    }
 };
 
-// C++23: std::string::contains() is now available
+// C++20: Using string_view for better performance
+const std::map<std::string_view, BYTE> keyMap = {
+    // Letters
+    {"A", 0x41}, {"B", 0x42}, {"C", 0x43}, {"D", 0x44}, {"E", 0x45},
+    {"F", 0x46}, {"G", 0x47}, {"H", 0x48}, {"I", 0x49}, {"J", 0x4A},
+    {"K", 0x4B}, {"L", 0x4C}, {"M", 0x4D}, {"N", 0x4E}, {"O", 0x4F},
+    {"P", 0x50}, {"Q", 0x51}, {"R", 0x52}, {"S", 0x53}, {"T", 0x54},
+    {"U", 0x55}, {"V", 0x56}, {"W", 0x57}, {"X", 0x58}, {"Y", 0x59}, {"Z", 0x5A},
+    
+    // Numbers
+    {"0", 0x30}, {"1", 0x31}, {"2", 0x32}, {"3", 0x33}, {"4", 0x34},
+    {"5", 0x35}, {"6", 0x36}, {"7", 0x37}, {"8", 0x38}, {"9", 0x39},
+    
+    // Function keys
+    {"F1", VK_F1}, {"F2", VK_F2}, {"F3", VK_F3}, {"F4", VK_F4},
+    {"F5", VK_F5}, {"F6", VK_F6}, {"F7", VK_F7}, {"F8", VK_F8},
+    {"F9", VK_F9}, {"F10", VK_F10}, {"F11", VK_F11}, {"F12", VK_F12},
+    
+    // Special keys
+    {"SPACE", VK_SPACE}, {"ENTER", VK_RETURN}, {"RETURN", VK_RETURN},
+    {"TAB", VK_TAB}, {"ESCAPE", VK_ESCAPE}, {"ESC", VK_ESCAPE},
+    {"BACKSPACE", VK_BACK}, {"DELETE", VK_DELETE}, {"DEL", VK_DELETE},
+    {"INSERT", VK_INSERT}, {"INS", VK_INSERT},
+    {"HOME", VK_HOME}, {"END", VK_END},
+    {"PAGEUP", VK_PRIOR}, {"PGUP", VK_PRIOR},
+    {"PAGEDOWN", VK_NEXT}, {"PGDN", VK_NEXT},
+    
+    // Arrow keys
+    {"UP", VK_UP}, {"DOWN", VK_DOWN}, {"LEFT", VK_LEFT}, {"RIGHT", VK_RIGHT},
+    
+    // Modifier keys
+    {"SHIFT", VK_SHIFT}, {"LSHIFT", VK_LSHIFT}, {"RSHIFT", VK_RSHIFT},
+    {"CTRL", VK_CONTROL}, {"CONTROL", VK_CONTROL},
+    {"LCTRL", VK_LCONTROL}, {"RCTRL", VK_RCONTROL},
+    {"ALT", VK_MENU}, {"LALT", VK_LMENU}, {"RALT", VK_RMENU},
+    {"WIN", VK_LWIN}, {"WINDOWS", VK_LWIN}, {"LWIN", VK_LWIN}, {"RWIN", VK_RWIN},
+    
+    // Numpad
+    {"NUMPAD0", VK_NUMPAD0}, {"NUMPAD1", VK_NUMPAD1}, {"NUMPAD2", VK_NUMPAD2},
+    {"NUMPAD3", VK_NUMPAD3}, {"NUMPAD4", VK_NUMPAD4}, {"NUMPAD5", VK_NUMPAD5},
+    {"NUMPAD6", VK_NUMPAD6}, {"NUMPAD7", VK_NUMPAD7}, {"NUMPAD8", VK_NUMPAD8},
+    {"NUMPAD9", VK_NUMPAD9},
+    {"MULTIPLY", VK_MULTIPLY}, {"ADD", VK_ADD}, {"SUBTRACT", VK_SUBTRACT},
+    {"DECIMAL", VK_DECIMAL}, {"DIVIDE", VK_DIVIDE},
+    
+    // Punctuation and symbols
+    {"COMMA", VK_OEM_COMMA}, {"PERIOD", VK_OEM_PERIOD}, {"DOT", VK_OEM_PERIOD},
+    {"SEMICOLON", VK_OEM_1}, {"QUOTE", VK_OEM_7}, {"APOSTROPHE", VK_OEM_7},
+    {"SLASH", VK_OEM_2}, {"BACKSLASH", VK_OEM_5},
+    {"LEFTBRACKET", VK_OEM_4}, {"RIGHTBRACKET", VK_OEM_6},
+    {"MINUS", VK_OEM_MINUS}, {"EQUALS", VK_OEM_PLUS}, {"EQUAL", VK_OEM_PLUS},
+    {"GRAVE", VK_OEM_3}, {"TILDE", VK_OEM_3}
+};
+
+// C++17: [[nodiscard]] attribute
 [[nodiscard]] constexpr std::string_view trim(std::string_view str) noexcept {
     constexpr std::string_view whitespace = " \t\r\n";
     const auto first = str.find_first_not_of(whitespace);
@@ -133,7 +106,7 @@ struct Command {
     return str.substr(first, (last - first + 1));
 }
 
-// C++23: Using ranges for transformation
+// C++20: Using ranges for transformation
 [[nodiscard]] std::string toUpper(std::string_view str) {
     std::string result;
     result.reserve(str.size());
@@ -142,7 +115,25 @@ struct Command {
     return result;
 }
 
-// C++23: Using std::expected for error handling
+// C++23: Check if string contains substring (fallback for older compilers)
+[[nodiscard]] inline bool contains(std::string_view str, std::string_view substr) {
+#if __cpp_lib_string_contains >= 202011L
+    return std::string(str).contains(substr);
+#else
+    return str.find(substr) != std::string_view::npos;
+#endif
+}
+
+// C++23: Check if string starts with prefix (fallback for older compilers)
+[[nodiscard]] inline bool starts_with(std::string_view str, char c) {
+#if __cpp_lib_starts_ends_with >= 201711L
+    return str.starts_with(c);
+#else
+    return !str.empty() && str[0] == c;
+#endif
+}
+
+// C++17: Using optional for better null handling
 struct ParsedValue {
     int value;
     int minVal;
@@ -150,7 +141,7 @@ struct ParsedValue {
     bool isRange;
 };
 
-[[nodiscard]] Result<ParsedValue> parseValueOrRange(std::string_view str) {
+[[nodiscard]] std::optional<ParsedValue> parseValueOrRange(std::string_view str) {
     if (const auto dashPos = str.find('-'); dashPos != std::string_view::npos && dashPos > 0) {
         // Parse as range
         const auto minStr = str.substr(0, dashPos);
@@ -167,10 +158,10 @@ struct ParsedValue {
                 std::swap(minVal, maxVal);
             }
             
-            return ParsedValue{.value = minVal, .minVal = minVal, .maxVal = maxVal, .isRange = true};
+            return ParsedValue{minVal, minVal, maxVal, true};
         }
-        catch (const std::exception& e) {
-            return std::unexpected(std::format("Failed to parse range: {}", e.what()));
+        catch (...) {
+            return std::nullopt;
         }
     }
     else {
@@ -178,15 +169,15 @@ struct ParsedValue {
         try {
             float floatValue = std::stof(std::string(str));
             int value = static_cast<int>(floatValue);
-            return ParsedValue{.value = value, .minVal = value, .maxVal = value, .isRange = false};
+            return ParsedValue{value, value, value, false};
         }
-        catch (const std::exception& e) {
-            return std::unexpected(std::format("Failed to parse value: {}", e.what()));
+        catch (...) {
+            return std::nullopt;
         }
     }
 }
 
-// C++23: Using std::random_device properly with C++23 improvements
+// Modern random number generator
 class RandomGenerator {
 private:
     std::random_device rd;
@@ -204,12 +195,8 @@ public:
     }
 };
 
-// C++23: Using concepts for type constraints
-template<typename T>
-concept Numeric = std::integral<T> || std::floating_point<T>;
-
-// Parse duration with better error handling
-[[nodiscard]] Result<Command> parsePauseCommand(std::string_view durationStr, int lineNumber) {
+// Parse pause command with optional
+[[nodiscard]] std::optional<Command> parsePauseCommand(std::string_view durationStr, int lineNumber) {
     Command cmd{.type = CommandType::PAUSE};
     
     if (const auto dashPos = durationStr.find('-'); dashPos != std::string_view::npos && dashPos > 0) {
@@ -229,7 +216,8 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
             cmd.useRandomRange = true;
         }
         catch (const std::exception& e) {
-            return std::unexpected(std::format("Invalid pause duration at line {}: {}", lineNumber, e.what()));
+            std::cerr << std::format("Invalid pause duration at line {}: {}\n", lineNumber, e.what());
+            return std::nullopt;
         }
     }
     else {
@@ -242,22 +230,25 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
             cmd.useRandomRange = false;
         }
         catch (const std::exception& e) {
-            return std::unexpected(std::format("Invalid pause duration at line {}: {}", lineNumber, e.what()));
+            std::cerr << std::format("Invalid pause duration at line {}: {}\n", lineNumber, e.what());
+            return std::nullopt;
         }
     }
     
     return cmd;
 }
 
-// C++23: Using std::expected for parseConfig
-[[nodiscard]] Result<std::vector<Command>> parseConfig(const fs::path& filename) {
+// C++17/20: Using filesystem and optional
+[[nodiscard]] std::optional<std::vector<Command>> parseConfig(const fs::path& filename) {
     if (!fs::exists(filename)) {
-        return std::unexpected(std::format("Config file does not exist: {}", filename.string()));
+        std::cerr << std::format("Config file does not exist: {}\n", filename.string());
+        return std::nullopt;
     }
     
     std::ifstream file(filename);
     if (!file.is_open()) {
-        return std::unexpected(std::format("Could not open config file: {}", filename.string()));
+        std::cerr << std::format("Could not open config file: {}\n", filename.string());
+        return std::nullopt;
     }
     
     std::vector<Command> commands;
@@ -269,7 +260,7 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
         const auto trimmedLine = trim(line);
         
         // Skip empty lines and comments
-        if (trimmedLine.empty() || trimmedLine.starts_with('#') || trimmedLine.starts_with(';')) {
+        if (trimmedLine.empty() || starts_with(trimmedLine, '#') || starts_with(trimmedLine, ';')) {
             continue;
         }
         
@@ -279,18 +270,15 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
         
         commandType = toUpper(commandType);
         
-        // C++23: Using if-constexpr with pattern matching style
         if (commandType == "PAUSE") {
             std::string durationStr;
             if (!(iss >> durationStr)) {
-                std::println(std::cerr, "Warning: Invalid pause duration at line {}: {}", lineNumber, line);
+                std::cerr << std::format("Warning: Invalid pause duration at line {}: {}\n", lineNumber, line);
                 continue;
             }
             
-            if (auto result = parsePauseCommand(durationStr, lineNumber); result) {
-                commands.push_back(result.value());
-            } else {
-                std::println(std::cerr, "Warning: {}", result.error());
+            if (auto cmd = parsePauseCommand(durationStr, lineNumber)) {
+                commands.push_back(*cmd);
             }
         }
         else if (commandType == "KEYDOWN" || commandType == "KEYPRESS") {
@@ -298,26 +286,25 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
             
             iss >> cmd.key;
             if (cmd.key.empty()) {
-                std::println(std::cerr, "Warning: Missing key at line {}: {}", lineNumber, line);
+                std::cerr << std::format("Warning: Missing key at line {}: {}\n", lineNumber, line);
                 continue;
             }
             
             std::string durationStr;
             if (!(iss >> durationStr)) {
-                std::println(std::cerr, "Warning: Invalid key duration at line {}: {}", lineNumber, line);
+                std::cerr << std::format("Warning: Invalid key duration at line {}: {}\n", lineNumber, line);
                 continue;
             }
             
-            if (auto parsed = parseValueOrRange(durationStr); parsed) {
-                const auto& val = parsed.value();
-                cmd.duration = std::chrono::milliseconds{val.value};
-                cmd.durationMin = std::chrono::milliseconds{val.minVal};
-                cmd.durationMax = std::chrono::milliseconds{val.maxVal};
-                cmd.useRandomRange = val.isRange;
+            if (auto parsed = parseValueOrRange(durationStr)) {
+                cmd.duration = std::chrono::milliseconds{parsed->value};
+                cmd.durationMin = std::chrono::milliseconds{parsed->minVal};
+                cmd.durationMax = std::chrono::milliseconds{parsed->maxVal};
+                cmd.useRandomRange = parsed->isRange;
                 cmd.key = toUpper(cmd.key);
                 commands.push_back(cmd);
             } else {
-                std::println(std::cerr, "Warning: Invalid key duration at line {}: {}", lineNumber, parsed.error());
+                std::cerr << std::format("Warning: Invalid key duration at line {}: {}\n", lineNumber, line);
             }
         }
         else if (commandType == "KEY") {
@@ -332,7 +319,7 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
             
             iss >> cmd.key;
             if (cmd.key.empty()) {
-                std::println(std::cerr, "Warning: Missing key at line {}: {}", lineNumber, line);
+                std::cerr << std::format("Warning: Missing key at line {}: {}\n", lineNumber, line);
                 continue;
             }
             cmd.key = toUpper(cmd.key);
@@ -341,7 +328,7 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
         else if (commandType == "LOOP") {
             int loopCount;
             if (!(iss >> loopCount)) {
-                std::println(std::cerr, "Warning: Invalid loop count at line {}: {}", lineNumber, line);
+                std::cerr << std::format("Warning: Invalid loop count at line {}: {}\n", lineNumber, line);
                 continue;
             }
             
@@ -355,14 +342,14 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
             commands.push_back(Command{.type = CommandType::ENDLOOP});
         }
         else {
-            std::println(std::cerr, "Warning: Unknown command at line {}: {}", lineNumber, line);
+            std::cerr << std::format("Warning: Unknown command at line {}: {}\n", lineNumber, line);
         }
     }
     
     return commands;
 }
 
-// Simulate key press with better timing
+// Simulate key press with chrono durations
 void pressKey(BYTE vkCode, std::chrono::milliseconds duration) {
     INPUT input[2] = {};
     
@@ -386,17 +373,17 @@ void pressKey(BYTE vkCode, std::chrono::milliseconds duration) {
     SendInput(1, &input[1], sizeof(INPUT));
 }
 
-// C++23: Using jthread for better thread management
-void executeMacro(std::span<const Command> commands, std::stop_token stopToken) {
+// C++20: Using span for array access
+void executeMacro(std::span<const Command> commands) {
     std::vector<int> loopStack;
     RandomGenerator rng;
     
-    for (size_t i = 0; i < commands.size() && !stopToken.stop_requested(); i++) {
+    for (size_t i = 0; i < commands.size(); i++) {
         const auto& cmd = commands[i];
         
         // Check for abort key (ESC)
         if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
-            std::println("Macro aborted by user (ESC pressed)");
+            std::cout << "Macro aborted by user (ESC pressed)\n";
             break;
         }
         
@@ -405,12 +392,13 @@ void executeMacro(std::span<const Command> commands, std::stop_token stopToken) 
                 auto actualDuration = cmd.duration;
                 if (cmd.useRandomRange) {
                     actualDuration = rng.getInRange(cmd.durationMin, cmd.durationMax);
-                    std::println("Pausing for {:.3f} seconds (random from {:.3f}-{:.3f})...", 
-                               actualDuration.count() / 1000.0,
-                               cmd.durationMin.count() / 1000.0,
-                               cmd.durationMax.count() / 1000.0);
+                    std::cout << std::format("Pausing for {:.3f} seconds (random from {:.3f}-{:.3f})...\n",
+                                            actualDuration.count() / 1000.0,
+                                            cmd.durationMin.count() / 1000.0,
+                                            cmd.durationMax.count() / 1000.0);
                 } else {
-                    std::println("Pausing for {:.3f} seconds...", actualDuration.count() / 1000.0);
+                    std::cout << std::format("Pausing for {:.3f} seconds...\n", 
+                                            actualDuration.count() / 1000.0);
                 }
                 std::this_thread::sleep_for(actualDuration);
                 break;
@@ -424,23 +412,24 @@ void executeMacro(std::span<const Command> commands, std::stop_token stopToken) 
                     auto actualDuration = cmd.duration;
                     if (cmd.useRandomRange) {
                         actualDuration = rng.getInRange(cmd.durationMin, cmd.durationMax);
-                        std::println("Pressing key: {} for {}ms (random from {}-{}ms)",
-                                   cmd.key, actualDuration.count(),
-                                   cmd.durationMin.count(), cmd.durationMax.count());
+                        std::cout << std::format("Pressing key: {} for {}ms (random from {}-{}ms)\n",
+                                               cmd.key, actualDuration.count(),
+                                               cmd.durationMin.count(), cmd.durationMax.count());
                     } else {
-                        std::println("Pressing key: {} for {}ms", cmd.key, actualDuration.count());
+                        std::cout << std::format("Pressing key: {} for {}ms\n", 
+                                               cmd.key, actualDuration.count());
                     }
                     pressKey(it->second, actualDuration);
                 }
                 else {
-                    std::println(std::cerr, "Unknown key: {}", cmd.key);
+                    std::cerr << std::format("Unknown key: {}\n", cmd.key);
                 }
                 break;
             }
             
             case CommandType::LOOP: {
                 loopStack.push_back(static_cast<int>(cmd.duration.count()));
-                std::println("Starting loop ({} iterations)", cmd.duration.count());
+                std::cout << std::format("Starting loop ({} iterations)\n", cmd.duration.count());
                 break;
             }
             
@@ -449,7 +438,7 @@ void executeMacro(std::span<const Command> commands, std::stop_token stopToken) 
                     auto& count = loopStack.back();
                     count--;
                     if (count > 0) {
-                        // Find matching LOOP command using ranges
+                        // Find matching LOOP command
                         int loopLevel = 1;
                         for (auto j = static_cast<int>(i) - 1; j >= 0; j--) {
                             if (commands[j].type == CommandType::ENDLOOP) {
@@ -466,7 +455,7 @@ void executeMacro(std::span<const Command> commands, std::stop_token stopToken) 
                     }
                     else {
                         loopStack.pop_back();
-                        std::println("Loop completed");
+                        std::cout << "Loop completed\n";
                     }
                 }
                 break;
@@ -479,7 +468,7 @@ void executeMacro(std::span<const Command> commands, std::stop_token stopToken) 
 }
 
 int main(int argc, char* argv[]) {
-    // C++23: Using std::span for argv
+    // C++20: Using span for argv
     std::span<char*> args(argv, argc);
     
     fs::path configFile = "macro.ini";
@@ -487,44 +476,35 @@ int main(int argc, char* argv[]) {
         configFile = args[1];
     }
     
-    std::println("================================");
-    std::println("Keyboard Macro Tool v2.0 (C++23)");
-    std::println("================================");
-    std::println("Loading config from: {}", configFile.string());
-    std::println("Press ESC at any time to abort the macro");
-    std::println("");
+    std::cout << "================================\n";
+    std::cout << "Keyboard Macro Tool v2.0 (C++20/23)\n";
+    std::cout << "================================\n";
+    std::cout << std::format("Loading config from: {}\n", configFile.string());
+    std::cout << "Press ESC at any time to abort the macro\n\n";
     
-    // Parse config file with better error handling
-    auto commandsResult = parseConfig(configFile);
-    if (!commandsResult) {
-        std::println(std::cerr, "Error: {}", commandsResult.error());
+    // Parse config file with optional
+    auto commandsOpt = parseConfig(configFile);
+    if (!commandsOpt) {
         return 1;
     }
     
-    auto& commands = commandsResult.value();
+    auto& commands = *commandsOpt;
     
     if (commands.empty()) {
-        std::println(std::cerr, "No valid commands found in config file");
+        std::cerr << "No valid commands found in config file\n";
         return 1;
     }
     
-    std::println("Loaded {} commands", commands.size());
-    std::println("Starting in 3 seconds...");
-    std::println("");
+    std::cout << std::format("Loaded {} commands\n", commands.size());
+    std::cout << "Starting in 3 seconds...\n\n";
     
     // Give user time to switch to target application
     std::this_thread::sleep_for(3s);
     
-    // C++23: Using jthread for automatic cleanup
-    std::jthread macroThread([&commands](std::stop_token st) {
-        executeMacro(commands, st);
-    });
+    // Execute macro with span
+    executeMacro(commands);
     
-    // Wait for completion
-    macroThread.join();
-    
-    std::println("");
-    std::println("Macro execution completed!");
+    std::cout << "\nMacro execution completed!\n";
     
     return 0;
 }
