@@ -1,7 +1,7 @@
 # Makefile for Keyboard Macro Tool
 
 CXX = g++
-CXXFLAGS = -std=c++23 -O2 -Wall -static
+CXXFLAGS = -std=c++23 -O3 -Wall -static
 LDFLAGS = -luser32
 TARGET = macro_tool.exe
 SOURCE = macro_tool.cpp

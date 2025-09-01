@@ -42,7 +42,7 @@ git pull
 
 REM Compile the program
 echo Compiling macro_tool.cpp to %BIN%\%random_string%.exe...
-g++ -o %BIN%\%random_string%.exe macro_tool.cpp -luser32 -std=c++23 -O2 -static
+g++ -o %BIN%\%random_string%.exe macro_tool.cpp -luser32 -std=c++23 -O3 -Wall -static
 
 if %errorlevel% neq 0 (
     echo.
