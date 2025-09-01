@@ -78,6 +78,16 @@ Edit `macro.ini` or create your own config file with the following commands:
 **Numpad**: NUMPAD0-NUMPAD9, MULTIPLY, ADD, SUBTRACT, DECIMAL, DIVIDE  
 **Symbols**: COMMA, PERIOD, SEMICOLON, QUOTE, SLASH, BACKSLASH, LEFTBRACKET, RIGHTBRACKET, MINUS, EQUALS, GRAVE  
 
+### Decimal Notation Support
+
+You can use decimal notation for more precise timing:
+
+```ini
+pause 0.150    # Pause for 150 milliseconds
+pause 1.5      # Pause for 1.5 seconds
+pause 0.05-0.15  # Random pause between 50-150ms
+```
+
 ### Example Configuration
 
 ```ini
@@ -254,5 +264,6 @@ For issues or questions:
 
 ## Version History
 
+- **v1.2** - Fixed decimal notation parsing (0.150 now correctly parsed as 150ms) and loop counter bug
 - **v1.1** - Added random range support for pause and keydown commands
 - **v1.0** - Initial release with basic macro support, loops, and extensive key mapping

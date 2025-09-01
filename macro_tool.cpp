@@ -89,7 +89,7 @@ std::string toUpper(const std::string& str) {
     return result;
 }
 
-// Parse a value that might be a range (e.g., "100" or "50-150")
+// Parse a value that might be a range (e.g., "100" or "50-150" or "0.5" for decimals)
 bool parseValueOrRange(const std::string& str, int& value, int& minVal, int& maxVal, bool& isRange) {
     size_t dashPos = str.find('-');
     
@@ -100,8 +100,12 @@ bool parseValueOrRange(const std::string& str, int& value, int& minVal, int& max
         std::string maxStr = str.substr(dashPos + 1);
         
         try {
-            minVal = std::stoi(minStr);
-            maxVal = std::stoi(maxStr);
+            // Parse as float first to handle decimals, then convert to int
+            float minFloat = std::stof(minStr);
+            float maxFloat = std::stof(maxStr);
+            
+            minVal = static_cast<int>(minFloat);
+            maxVal = static_cast<int>(maxFloat);
             
             if (minVal > maxVal) {
                 // Swap if min > max
@@ -119,7 +123,9 @@ bool parseValueOrRange(const std::string& str, int& value, int& minVal, int& max
     else {
         // Parse as single value
         try {
-            value = std::stoi(str);
+            // Parse as float first to handle decimals like 0.150
+            float floatValue = std::stof(str);
+            value = static_cast<int>(floatValue);
             minVal = value;
             maxVal = value;
             isRange = false;
@@ -176,15 +182,40 @@ std::vector<Command> parseConfig(const std::string& filename) {
                 continue;
             }
             
-            if (!parseValueOrRange(durationStr, cmd.duration, cmd.durationMin, cmd.durationMax, cmd.useRandomRange)) {
-                std::cerr << "Warning: Invalid pause duration at line " << lineNumber << ": " << line << std::endl;
-                continue;
+            // Parse pause duration - handle both decimals and ranges
+            // For pause, we expect seconds (possibly with decimals)
+            size_t dashPos = durationStr.find('-');
+            if (dashPos != std::string::npos && dashPos > 0) {
+                // This is a range
+                std::string minStr = durationStr.substr(0, dashPos);
+                std::string maxStr = durationStr.substr(dashPos + 1);
+                try {
+                    float minSeconds = std::stof(minStr);
+                    float maxSeconds = std::stof(maxStr);
+                    cmd.durationMin = static_cast<int>(minSeconds * 1000);
+                    cmd.durationMax = static_cast<int>(maxSeconds * 1000);
+                    if (cmd.durationMin > cmd.durationMax) {
+                        std::swap(cmd.durationMin, cmd.durationMax);
+                    }
+                    cmd.duration = cmd.durationMin;
+                    cmd.useRandomRange = true;
+                } catch (...) {
+                    std::cerr << "Warning: Invalid pause duration at line " << lineNumber << ": " << line << std::endl;
+                    continue;
+                }
+            } else {
+                // Single value
+                try {
+                    float seconds = std::stof(durationStr);
+                    cmd.duration = static_cast<int>(seconds * 1000);
+                    cmd.durationMin = cmd.duration;
+                    cmd.durationMax = cmd.duration;
+                    cmd.useRandomRange = false;
+                } catch (...) {
+                    std::cerr << "Warning: Invalid pause duration at line " << lineNumber << ": " << line << std::endl;
+                    continue;
+                }
             }
-            
-            // Convert seconds to milliseconds
-            cmd.duration *= 1000;
-            cmd.durationMin *= 1000;
-            cmd.durationMax *= 1000;
             commands.push_back(cmd);
         }
         else if (commandType == "KEYDOWN" || commandType == "KEYPRESS") {
@@ -328,7 +359,7 @@ void executeMacro(const std::vector<Command>& commands) {
                         else if (commands[j].type == "LOOP") {
                             loopLevel--;
                             if (loopLevel == 0) {
-                                i = j - 1; // Will be incremented by the for loop
+                                i = j; // Set to the LOOP command position
                                 break;
                             }
                         }
@@ -352,7 +383,7 @@ int main(int argc, char* argv[]) {
     }
     
     std::cout << "================================" << std::endl;
-    std::cout << "Keyboard Macro Tool v1.0" << std::endl;
+    std::cout << "Keyboard Macro Tool v1.2" << std::endl;
     std::cout << "================================" << std::endl;
     std::cout << "Loading config from: " << configFile << std::endl;
     std::cout << "Press ESC at any time to abort the macro" << std::endl;

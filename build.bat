@@ -1,6 +1,6 @@
 @echo off
 echo ================================
-echo Building Keyboard Macro Tool v1.1
+echo Building Keyboard Macro Tool v1.2
 echo ================================
 echo.
 
